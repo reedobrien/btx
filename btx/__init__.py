@@ -36,8 +36,6 @@ def yaml_load(value):
     return _load(value)
 
 
-import botocore.session
-
 ## At some point this was a fine example of IAM config info. It may be out of
 ## date
 examplish_config = """
