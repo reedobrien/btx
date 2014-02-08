@@ -41,6 +41,7 @@ import botocore.session
 ## At some point this was a fine example of IAM config info. It may be out of
 ## date
 examplish_config = """
+service: IAM
 groups:
   - {group_name: "group1", policy_name: "allow-rw-to-s3", policy_document: '{"Version":"2012-10-17","Statement":[{"Effect":"Allow","Action":["s3:AbortMultipartUpload","s3:DeleteObject","s3:GetObject","s3:GetObjectAcl","s3:ListMultipartUploadParts","s3:PutObject","s3:PutObjectAcl"],"Resource":["arn:aws:s3:::hqmigrat-stage/*"]},{"Sid":"Stmt1391189122000","Effect":"Allow","Action":["s3:AbortMultipartUpload","s3:DeleteObject","s3:GetObject","s3:GetObjectAcl","s3:ListMultipartUploadParts","s3:PutObject","s3:PutObjectAcl"],"Resource":["arn:aws:s3:::hqmigrat-prod/*"]}]}'}
   - {group_name: "group2", policy_name: "allow-rw-to-s3", policy_document: '{"Version":"2012-10-17","Statement":[{"Effect":"Allow","Action":["s3:AbortMultipartUpload","s3:DeleteObject","s3:GetObject","s3:GetObjectAcl","s3:ListMultipartUploadParts","s3:PutObject","s3:PutObjectAcl"],"Resource":["arn:aws:s3:::hqmigrat-stage/*"]},{"Sid":"Stmt1391189122000","Effect":"Allow","Action":["s3:AbortMultipartUpload","s3:DeleteObject","s3:GetObject","s3:GetObjectAcl","s3:ListMultipartUploadParts","s3:PutObject","s3:PutObjectAcl"],"Resource":["arn:aws:s3:::hqmigrat-stage/*"]}]}'}
@@ -61,7 +62,7 @@ roles:
 
 
 class BTX(object):
-    def __init__(self, config_path, service,
+    def __init__(self, config_path,
                  debug=False, dryrun=False, logger=None, region="us-east-1",
                  config_format="yaml"):
         assert config_format in ("yaml", "json")
@@ -75,7 +76,8 @@ class BTX(object):
             self.setup_logger(level=logging.DEBUG)
         self.dryrun = dryrun
         self._session = botocore.session.get_session()
-        self._service = self._session.get_service(service)
+        self._service = self._session.get_service(
+            self.config["service"].lower())
         self._ep = self._service.get_endpoint(region)
 
         if self.dryrun:
