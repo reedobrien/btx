@@ -17,7 +17,7 @@ requires = ["botocore", "pyaml"]
 tests_requires = requires + ['nose', 'coverage']
 
 setup(name='btx',
-      version='0.1',
+      version='0.1.1',
       description='A botocore helper class',
       long_description=README + '\n\n' + CHANGES,
       classifiers=[
