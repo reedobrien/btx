@@ -8,6 +8,7 @@ Purpose: Wrap botocore for easier use with serialized configuration files
 """
 from __future__ import unicode_literals
 
+import json
 import logging
 import sys
 
@@ -104,12 +105,16 @@ class BTX(object):
                 self.config = yaml_load(f.read())
             else:
                 with open(path) as f:
-                    import json
                     self.config = json.load(f)
 
     def load_policy(self, path):
         with open(path) as f:
+            # load as json
             return json.load(f)
+
+    def policy_string(self, path):
+        ## AWS wants a string of JSON
+        return json.dumps(self.load_policy(path))
 
     def setup_logger(self, level=logging.INFO):
         log = logging.getLogger("BTX-{}".format(self.config["service"]))
