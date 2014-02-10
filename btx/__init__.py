@@ -67,16 +67,18 @@ class BTX(object):
         self.config_format = config_format
         self.load_config(config_path)
         assert not (debug and logger)
-        if logger:
-            assert logger
-            self.log = logger
-        elif debug:
-            self.setup_logger(level=logging.DEBUG)
         self.dryrun = dryrun
         self._session = botocore.session.get_session()
         self._service = self._session.get_service(
             self.config["service"].lower())
         self._ep = self._service.get_endpoint(region)
+        if logger:
+            # assert it is type logger
+            self.log = logger
+        elif debug:
+            self.setup_logger(level=logging.DEBUG)
+        else:
+            self.setup_logger()
 
         if self.dryrun:
             self.log.critical(
@@ -86,7 +88,7 @@ class BTX(object):
     def __call__(self, operation, **kwargs):
         self.log.info("Performing {} with {}".format(operation, kwargs))
         if not self.dryrun:
-            op = self._iam.get_operation(operation)
+            op = self._service.get_operation(operation)
             r, d = op.call(self._ep, **kwargs)
             if not r.ok:
                 self.log.error(
@@ -96,14 +98,18 @@ class BTX(object):
             # let caller decide if it is an "Exception"
             return r, d
 
-    def load_config(self, conf_path):
-        if self.config_format == "yaml":
-            with open(conf_path) as f:
+    def load_config(self, path):
+        with open(path) as f:
+            if self.config_format == "yaml":
                 self.config = yaml_load(f.read())
-        else:
-            with open(conf_path) as f:
-                import json
-                self.config = json.load(f)
+            else:
+                with open(path) as f:
+                    import json
+                    self.config = json.load(f)
+
+    def load_policy(self, path):
+        with open(path) as f:
+            return json.load(f)
 
     def setup_logger(self, level=logging.INFO):
         log = logging.getLogger("BTX-{}".format(self._service))
