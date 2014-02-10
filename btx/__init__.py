@@ -112,7 +112,7 @@ class BTX(object):
             return json.load(f)
 
     def setup_logger(self, level=logging.INFO):
-        log = logging.getLogger("BTX-{}".format(self._service))
+        log = logging.getLogger("BTX-{}".format(self.config["service"]))
         log.setLevel(level)
         handler = logging.StreamHandler(sys.stdout)
         handler.setLevel(logging.INFO)
