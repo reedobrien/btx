@@ -8,6 +8,7 @@ Purpose: Wrap botocore for easier use with serialized configuration files
 """
 from __future__ import unicode_literals
 
+import json
 import logging
 import sys
 
@@ -40,22 +41,104 @@ def yaml_load(value):
 ## date
 examplish_config = """
 service: IAM
+
 groups:
-  - {group_name: "group1", policy_name: "allow-rw-to-s3", policy_document: '{"Version":"2012-10-17","Statement":[{"Effect":"Allow","Action":["s3:AbortMultipartUpload","s3:DeleteObject","s3:GetObject","s3:GetObjectAcl","s3:ListMultipartUploadParts","s3:PutObject","s3:PutObjectAcl"],"Resource":["arn:aws:s3:::hqmigrat-stage/*"]},{"Sid":"Stmt1391189122000","Effect":"Allow","Action":["s3:AbortMultipartUpload","s3:DeleteObject","s3:GetObject","s3:GetObjectAcl","s3:ListMultipartUploadParts","s3:PutObject","s3:PutObjectAcl"],"Resource":["arn:aws:s3:::hqmigrat-prod/*"]}]}'}
-  - {group_name: "group2", policy_name: "allow-rw-to-s3", policy_document: '{"Version":"2012-10-17","Statement":[{"Effect":"Allow","Action":["s3:AbortMultipartUpload","s3:DeleteObject","s3:GetObject","s3:GetObjectAcl","s3:ListMultipartUploadParts","s3:PutObject","s3:PutObjectAcl"],"Resource":["arn:aws:s3:::hqmigrat-stage/*"]},{"Sid":"Stmt1391189122000","Effect":"Allow","Action":["s3:AbortMultipartUpload","s3:DeleteObject","s3:GetObject","s3:GetObjectAcl","s3:ListMultipartUploadParts","s3:PutObject","s3:PutObjectAcl"],"Resource":["arn:aws:s3:::hqmigrat-stage/*"]}]}'}
-  - {group_name: "group3", policy_name: "allow-rw-to-s3", policy_document: '{"Version":"2012-10-17","Statement":[{"Effect":"Allow","Action":["s3:AbortMultipartUpload","s3:DeleteObject","s3:GetObject","s3:GetObjectAcl","s3:ListMultipartUploadParts","s3:PutObject","s3:PutObjectAcl"],"Resource":["arn:aws:s3:::hqmigrat-stage/*"]},{"Sid":"Stmt1391189122000","Effect":"Allow","Action":["s3:AbortMultipartUpload","s3:DeleteObject","s3:GetObject","s3:GetObjectAcl","s3:ListMultipartUploadParts","s3:PutObject","s3:PutObjectAcl"],"Resource":["arn:aws:s3:::hqmigrat-dev/*"]}]}'}
+  - group_name: "group1"
+    policy_name: "allow-rw-to-s3"
+    policy_document: "example-allow-rw-to-s3.json"
+  - group_name: "group2"
+    policy_name: "allow-rw-to-s3"
+    policy_document: "example-allow-rw-to-s3.json"
+  - group_name: "group3"
+    policy_name: "allow-rw-to-s3"
+    policy_document: "example-allow-rw-to-s3.json"
 
 users:
-    - {user_name: "user1", groups: [group2, group1]}
-    - {user_name: "user2", groups: [group1]}
-    - {user_name: "user3", groups: [group3, group2, group1]}
-    - {user_name: "user4", groups: [group2]}
+  - user_name: "user1"
+    groups: [group2, group1]
+  - user_name: "user2"
+    groups: [group1]
+  - user_name: "user3"
+    groups: [group3, group2, group1]
+  - user_name: "user4"
+    groups: [group2, group3]
 
 roles:
-  - {role_name: "role1-service", policy_name: "allow-rw-to-s3", assume_role_policy_document: '{"Statement":[{"Effect":"Allow","Action":["sts:AssumeRole"],"Principal":{ "Service" : ["ec2.amazonaws.com"]}}]}', policy_document: '{"Version":"2012-10-17","Statement":[{"Effect":"Allow","Action":["s3:AbortMultipartUpload","s3:DeleteObject","s3:GetObject","s3:GetObjectAcl","s3:ListMultipartUploadParts","s3:PutObject","s3:PutObjectAcl"],"Resource":["arn:aws:s3:::hqmigrat-stage/*"]},{"Sid":"Stmt1391189122000","Effect":"Allow","Action":["s3:AbortMultipartUpload","s3:DeleteObject","s3:GetObject","s3:GetObjectAcl","s3:ListMultipartUploadParts","s3:PutObject","s3:PutObjectAcl"],"Resource":["arn:aws:s3:::hqmigrat-prod/*"]}]}'}
-  - {role_name: "role2-service", policy_name: "allow-rw-to-s3", assume_role_policy_document: '{"Statement":[{"Effect":"Allow","Action":["sts:AssumeRole"],"Principal":{ "Service" : ["ec2.amazonaws.com"]}}]}', policy_document: '{"Version":"2012-10-17","Statement":[{"Effect":"Allow","Action":["s3:AbortMultipartUpload","s3:DeleteObject","s3:GetObject","s3:GetObjectAcl","s3:ListMultipartUploadParts","s3:PutObject","s3:PutObjectAcl"],"Resource":["arn:aws:s3:::hqmigrat-stage/*"]},{"Sid":"Stmt1391189122000","Effect":"Allow","Action":["s3:AbortMultipartUpload","s3:DeleteObject","s3:GetObject","s3:GetObjectAcl","s3:ListMultipartUploadParts","s3:PutObject","s3:PutObjectAcl"],"Resource":["arn:aws:s3:::hqmigrat-stage/*"]}]}'}
-  - {role_name: "role3-service", policy_name: "allow-rw-to-s3", assume_role_policy_document: '{"Statement":[{"Effect":"Allow","Action":["sts:AssumeRole"],"Principal":{ "Service" : ["ec2.amazonaws.com"]}}]}', policy_document: '{"Version":"2012-10-17","Statement":[{"Effect":"Allow","Action":["s3:AbortMultipartUpload","s3:DeleteObject","s3:GetObject","s3:GetObjectAcl","s3:ListMultipartUploadParts","s3:PutObject","s3:PutObjectAcl"],"Resource":["arn:aws:s3:::hqmigrat-stage/*"]},{"Sid":"Stmt1391189122000","Effect":"Allow","Action":["s3:AbortMultipartUpload","s3:DeleteObject","s3:GetObject","s3:GetObjectAcl","s3:ListMultipartUploadParts","s3:PutObject","s3:PutObjectAcl"],"Resource":["arn:aws:s3:::hqmigrat-dev/*"]}]}'}
+  - role_name: "role1-service"
+    policy_name: "allow-rw-to-s3"
+    assume_role_policy_document: "allow-assume-role-by-ec2-service.json"
+    policy_document: "example-allow-rw-to-s3.json"
+  - role_name: "role2-service"
+    policy_name: "allow-rw-to-s3"
+    assume_role_policy_document: "allow-assume-role-by-ec2-service.json"
+    policy_document: "example-allow-rw-to-s3.json"
+  - role_name: "role3-service"
+    policy_name: "allow-rw-to-s3"
+    assume_role_policy_document: "allow-assume-role-by-ec2-service.json"
+    policy_document: "example-allow-rw-to-s3.json"
+"""
 
+allow_assume_role_by_ec2_service = """{
+    "Statement":
+    [
+        {
+            "Effect": "Allow",
+            "Action": [
+                "sts:AssumeRole"
+                ],
+            "Principal":
+            {
+                "Service" :
+                [
+                    "ec2.amazonaws.com"
+                ]
+            }
+        }
+    ]
+}
+"""
+
+example_allow_rw_to_s3 = """{
+    "Version":"2012-10-17",
+    "Statement":
+        [
+            {
+                "Effect":"Allow",
+                "Action":
+                [
+                "s3:AbortMultipartUpload",
+                "s3:DeleteObject",
+                "s3:GetObject",
+                "s3:GetObjectAcl",
+                "s3:ListMultipartUploadParts",
+                "s3:PutObject",
+                "s3:PutObjectAcl"
+                ],
+                "Resource":
+                    [
+                    "arn:aws:s3:::hqmigrat-stage/*"
+                    ]
+            },
+            {
+                "Sid":"Stmt1391189122000",
+                "Effect":"Allow",
+                "Action":
+                [
+                "s3:AbortMultipartUpload",
+                "s3:DeleteObject",
+                "s3:GetObject",
+                "s3:GetObjectAcl",
+                "s3:ListMultipartUploadParts",
+                "s3:PutObject",
+                "s3:PutObjectAcl"
+                ],
+                "Resource":
+                [
+                "arn:aws:s3:::hqmigrat-prod/*"
+                ]
+            }
+        ]
+}
 """
 
 
@@ -104,18 +187,22 @@ class BTX(object):
                 self.config = yaml_load(f.read())
             else:
                 with open(path) as f:
-                    import json
                     self.config = json.load(f)
 
     def load_policy(self, path):
         with open(path) as f:
+            # load as json
             return json.load(f)
+
+    def policy_string(self, path):
+        ## AWS wants a string of JSON
+        return json.dumps(self.load_policy(path))
 
     def setup_logger(self, level=logging.INFO):
         log = logging.getLogger("BTX-{}".format(self.config["service"]))
         log.setLevel(level)
         handler = logging.StreamHandler(sys.stdout)
-        handler.setLevel(logging.INFO)
+        handler.setLevel(level)
         handler.setFormatter(logging.Formatter(
             "%(asctime)s %(name)s: [%(levelname)s] %(message)s"))
         log.addHandler(handler)
