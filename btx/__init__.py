@@ -120,7 +120,7 @@ class BTX(object):
         log = logging.getLogger("BTX-{}".format(self.config["service"]))
         log.setLevel(level)
         handler = logging.StreamHandler(sys.stdout)
-        handler.setLevel(logging.INFO)
+        handler.setLevel(level)
         handler.setFormatter(logging.Formatter(
             "%(asctime)s %(name)s: [%(levelname)s] %(message)s"))
         log.addHandler(handler)
