@@ -1,5 +1,4 @@
-include README.md
-recursive-include *.md
+include *.md
 recursive-include btx *
 include *
 global-exclude *.pyc
